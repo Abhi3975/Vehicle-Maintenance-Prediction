@@ -17,6 +17,25 @@ def add_custom_features(df):
 
     return df
 
+def scale_features(df, columns=None):
+    """
+    Normalizes numerical features using StandardScaler.
+    Default columns: Mileage, Odometer_Reading.
+    Returns the scaled DataFrame and the fitted scaler.
+    """
+    if columns is None:
+        columns = ['Mileage', 'Odometer_Reading']
+
+    df = df.copy()
+    scaler = StandardScaler()
+
+    # Only scale columns that exist in the dataframe
+    cols_to_scale = [col for col in columns if col in df.columns]
+    if cols_to_scale:
+        df[cols_to_scale] = scaler.fit_transform(df[cols_to_scale])
+
+    return df, scaler
+
 def preprocess_data(df, target_col='Need_Maintenance', is_training=True):
     """
     Cleans and prepares the vehicle data for ML models.
