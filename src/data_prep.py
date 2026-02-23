@@ -39,11 +39,18 @@ def scale_features(df, columns=None):
 def preprocess_data(df, target_col='Need_Maintenance', is_training=True):
     """
     Cleans and prepares the vehicle data for ML models.
+    Includes custom feature engineering and numerical scaling.
     """
     df = df.copy()
     
     # Handle missing values if any
     df = df.fillna(df.median(numeric_only=True))
+    
+    # Add custom engineered features
+    df = add_custom_features(df)
+    
+    # Normalize numerical features using StandardScaler
+    df, scaler = scale_features(df, columns=['Mileage', 'Odometer_Reading'])
     
     # Encoding categorical features
     categorical_cols = ['Vehicle_Model', 'Maintenance_History', 'Fuel_Type']
