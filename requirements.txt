@@ -6,3 +6,9 @@ streamlit>=1.40.0
 matplotlib
 seaborn
 altair<5
+langgraph
+langchain
+langchain-groq
+chromadb
+sentence-transformers
+python-dotenv

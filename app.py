@@ -6,6 +6,7 @@ from src.data_prep import preprocess_data
 from src.validate_data import validate_csv
 import matplotlib.pyplot as plt
 import seaborn as sns
+from src.agent.workflow import run_maintenance_agent
 
 # Set page config
 st.set_page_config(page_title="Vehicle Maintenance Predictor", layout="wide")
@@ -140,10 +141,46 @@ if display_df is not None:
     
     if len(display_df) == 1:
         show_maintenance_tips(display_df['Risk_Score'].iloc[0])
+        
+        st.markdown("---")
+        st.subheader("🤖 AI Fleet Assistant Deep Dive")
+        if st.button("Generate Comprehensive AI Report"):
+            with st.spinner("Agent is reasoning about vehicle health..."):
+                # Get importance factors
+                if model and hasattr(model, 'feature_importances_') and X_input is not None:
+                    importances = model.feature_importances_
+                    feat_importance = pd.DataFrame({'Feature': X_input.columns, 'Importance': importances})
+                    top_factors = feat_importance.sort_values('Importance', ascending=False)['Feature'].tolist()
+                else:
+                    top_factors = ["General Wear"]
+                
+                report = run_maintenance_agent(
+                    display_df.iloc[0].to_dict(), 
+                    display_df['Risk_Score'].iloc[0],
+                    top_factors
+                )
+                st.markdown(report)
     else:
         high_risk_vehicle = display_df.sort_values('Risk_Score', ascending=False).iloc[0]
         st.info(f"Summary for highest risk vehicle: {high_risk_vehicle['Vehicle_Model']}")
         show_maintenance_tips(high_risk_vehicle['Risk_Score'])
+        
+        if st.button(f"Generate AI Report for {high_risk_vehicle['Vehicle_Model']}"):
+            with st.spinner("Analyzing high-risk vehicle..."):
+                # Get importance factors
+                if model and hasattr(model, 'feature_importances_') and X_input is not None:
+                    importances = model.feature_importances_
+                    feat_importance = pd.DataFrame({'Feature': X_input.columns, 'Importance': importances})
+                    top_factors = feat_importance.sort_values('Importance', ascending=False)['Feature'].tolist()
+                else:
+                    top_factors = ["General Wear"]
+
+                report = run_maintenance_agent(
+                    high_risk_vehicle.to_dict(), 
+                    high_risk_vehicle['Risk_Score'],
+                    top_factors
+                )
+                st.markdown(report)
 
     col1, col2 = st.columns(2)
     
